@@ -13,7 +13,7 @@
 
 **不包含 NDVI、GEE 在线分析以及已经回退的功能。** 坐标计算器只转换经纬度表示格式并推荐分带，不进行基准转换或经纬度→投影 XY 计算。坐标页源自用户提供的 [coordinate-converter](https://github.com/RoxyMigurdia373/coordinate-converter)，确切提交记录在 `tools/coordinate_converter/SOURCE.md`。
 
-## 交给同事使用
+## 交给他人使用
 
 1. 拷贝整个 `dist/GISToolbox/` 文件夹到同事电脑，可压缩后发送、解压使用。
 2. 双击其中的 **GISToolbox.exe**，不要单独拷贝 exe；必须保留 `_internal`。
