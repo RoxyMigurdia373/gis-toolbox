@@ -13,6 +13,11 @@ _theme = _ThemePath(__file__).resolve().parents[2] / "ui" / "streamlit.css"
 if _theme.is_file():
     st.markdown("<style>" + _theme.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.title('🗺️ SHP 转 KML / KMZ')
+mode = st.radio('处理方式', ['SHP 转 KML / KMZ', 'GeoJSON 转 SHP'], horizontal=True)
+if mode == 'GeoJSON 转 SHP':
+    from geojson_workspace import render_geojson_workspace
+    render_geojson_workspace()
+    st.stop()
 st.caption('中文属性 · WGS84 经纬度 · 批量上传、转换、下载 · 无需登录')
 st.warning('每个 ZIP 上传上限 1 GB（1024 MB），多个上传文件会累计占用内存。云端内存有限，允许上传不代表能处理任意 1 GB 文件；大文件建议在本机运行。解压总量上限 4 GB。')
 st.caption('文件会上传到运行本工具的服务器；转换不调用外部服务。临时工作文件在本次处理结束后删除。')

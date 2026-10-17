@@ -75,7 +75,4 @@ with patch.object(st, 'file_uploader', return_value=Upload()):
         self.assertIn('vector_geojson', app.session_state)
         app.slider[0].set_value(.8).run()
         self.assertNotIn('vector_geojson', app.session_state)
-        app.radio[0].set_value('GeoJSON 转 SHP').run()
-        app.button[0].click().run()
-        self.assertIn('vector_shp', app.session_state)
         self.assertEqual(len(app.exception), 0)

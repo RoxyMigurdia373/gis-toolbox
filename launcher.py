@@ -37,7 +37,10 @@ def main():
         from manifest_loader import load_manifests
         from tool_manager import ToolManager
         from main_window import create_main_window
+        os.environ["QT_API"] = "pyside6"
         import webview
+        from qt_compat import configure_qt_downloads
+        configure_qt_downloads("qtwebengine")
 
         tools = load_manifests()
         if not tools:
@@ -47,13 +50,13 @@ def main():
         webview.settings["ALLOW_DOWNLOADS"] = True
         webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
         logging.info("启动 %s %s，工具 %s，用户目录 %s", config["name"], config["version"], list(tools), user_data_dir())
-        webview.start(gui="edgechromium", debug=False, http_server=False,
+        webview.start(gui="qt", debug=False, http_server=False,
                       private_mode=False, storage_path=str(user_data_dir() / "webview"))
         return 0
     except Exception as exc:
         logging.exception("主程序启动失败")
         show_message(f"启动失败：{exc}\n\n请查看用户目录 GISToolbox/logs/app.log。\n"
-                     "若提示 WebView2 不可用，请安装 Microsoft Edge WebView2 Runtime。")
+                     "请完整解压发布包，保留 _internal 目录。支持 Windows 10/11 64 位。")
         return 1
     finally:
         if manager:

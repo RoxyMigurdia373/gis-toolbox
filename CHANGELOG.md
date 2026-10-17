@@ -1,5 +1,13 @@
 # 更新日志
 
+## 1.1.0-rc.2 — 2026-10-17（预发布）
+
+- 窗口改用随包分发的 Qt WebEngine（PySide6 6.8.3、pywebview 6.2.1），移除 Python.NET/CLR/WinForms 启动链，不再要求另装 WebView2；解决此启动链上的 Python.Runtime.Loader.Initialize 故障。包体积增加。
+- 适配 Qt6 下载 API，保留保存对话框、中文文件名和取消下载。
+- GeoJSON 转 SHP 移至“SHP 转 KML / KMZ”的处理方式选项；耕地工具仅保留周边分析与矢量字段配色。
+- 配色页面同步奥维 10.6.2 的已知线颜色兼容限制。旧版标签和发布附件保留，更新前已创建并校验备份。
+- 支持范围为 Windows 10/11 x64；当前实测 Windows 11 26100，不宣称已覆盖所有电脑。详见 VALIDATION.md。
+
 ## 1.1.0-rc.1 — 2026-10-17（预发布）
 
 - 重新设计桌面主界面：深蓝侧栏、工作台、工具状态与地块线稿；三个 Streamlit 工具和坐标页统一主题。

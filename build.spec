@@ -5,19 +5,22 @@ import os
 from PyInstaller.utils.hooks import collect_all, copy_metadata
 
 root = Path(SPECPATH)
-datas = [(str(root / folder), folder) for folder in ('ui', 'config', '.streamlit')]
+datas = [(str(root / folder), folder) for folder in ('ui', 'config', '.streamlit', 'licenses')]
 for path in (root / 'tools').rglob('*'):
     relative = path.relative_to(root)
     if path.is_file() and not any(part in ('__pycache__', '.git', '.venv', '.pytest_cache') for part in relative.parts) and path.suffix not in ('.pyc', '.log'):
         datas.append((str(path), str(relative.parent)))
+from PyInstaller.utils.hooks import collect_data_files
+datas += collect_data_files('webview')
 datas.append((str(root / 'icon.ico'), '.'))
 binaries = []
 hiddenimports = ['streamlit.web.cli', 'streamlit.runtime.scriptrunner.magic_funcs',
                  'streamlit.runtime.scriptrunner.script_runner', 'fiona.ogrext', 'pyogrio._io',
-                 'webview.platforms.winforms', 'webview.platforms.edgechromium', 'pythonnet', 'clr',
+                 'webview.platforms.qt', 'qtpy', 'PySide6.QtWebEngineCore',
+                 'PySide6.QtWebEngineWidgets', 'PySide6.QtWebChannel',
                  'sqlite3', 'xml.sax.saxutils']
 for package in ('streamlit', 'geopandas', 'pyogrio', 'shapely', 'fiona', 'pyproj',
-                'webview', 'ijson', 'simplejson', 'pythonnet', 'clr_loader'):
+                'ijson', 'simplejson'):
     data, binary, hidden = collect_all(package)
     datas += data
     binaries += binary
@@ -37,7 +40,8 @@ else:
 a = Analysis([str(root / 'launcher.py')], pathex=[str(root)],
              binaries=binaries, datas=datas, hiddenimports=hiddenimports,
              hookspath=[], hooksconfig={}, runtime_hooks=[],
-             excludes=['matplotlib', 'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6',
+             excludes=['matplotlib', 'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'pythonnet', 'clr', 'clr_loader',
+                       'webview.platforms.winforms', 'webview.platforms.edgechromium',
                        'IPython', 'jupyter', 'notebook', 'pytest'], noarchive=False)
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='GISToolbox',

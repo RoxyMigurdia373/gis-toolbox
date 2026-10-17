@@ -1,6 +1,6 @@
 # GIS 工具箱 · Windows 本地桌面版
 
-版本 **1.1.0-rc.1（预发布）**。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
+版本 **1.1.0-rc.2（预发布）**。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
 
 ## 当前收录的四个工具
 
@@ -20,15 +20,15 @@
 3. 主界面点击“打开工具”，每个工具在独立窗口打开；再次点击会切换到已有窗口。
 4. 用各工具中的下载按钮保存结果。关闭单个窗口只结束该工具；关闭主界面结束所有工具。
 
-同事不需要安装 Python、QGIS，也不需要打开浏览器或命令行。Windows 10/11 x64 需要 **Microsoft Edge WebView2 Runtime**；多数 Windows 11 已有，旧版 Windows 10 可能需要安装 [微软 WebView2 Evergreen Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)。不能保证所有干净系统都预装 WebView2，不应承诺完全零系统组件要求。
+支持 Windows 10/11 x64。完整解压后运行 GISToolbox.exe，保留同目录的 _internal 文件夹。内置 Python、GIS 库和 Qt WebEngine，无需另装 Python、QGIS、.NET 或 WebView2。尚未在干净 Windows 虚拟机上验收，企业策略、驱动和系统差异仍可能影响运行。
 
-页面由 WebView2 嵌入原生窗口；Streamlit 只监听 `127.0.0.1`，不对局域网开放。分析本地处理，遥测关闭。数据不上传云端；若主动点击网页中的外部链接，需要联网。
+页面由 Qt WebEngine 嵌入原生窗口；Streamlit 只监听 `127.0.0.1`，不对局域网开放。分析本地处理，遥测关闭。数据不上传云端；若主动点击网页中的外部链接，需要联网。
 
 ## 项目结构
 
 ```text
 gis-toolbox/
-  launcher.py                 主入口、freeze_support、单实例锁、WebView2
+  launcher.py                 主入口、freeze_support、单实例锁、Qt WebEngine
   main_window.py              主窗口与有限 JS API
   tool_manager.py             注册工具的窗口与进程生命周期
   port_allocator.py           8501–8600 优先端口和动态回退
@@ -84,7 +84,7 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe scripts/build_desktop.py
 ```
 
-输出为 `dist/GISToolbox/GISToolbox.exe`。使用 `COLLECT/onedir`，`console=False`，`upx=False`，所有工具共享内置解释器和 GIS DLL。pywebview 的实际导入包名是 `webview`，spec 按此收集资源、EdgeChromium 和 Python.NET。
+输出为 `dist/GISToolbox/GISToolbox.exe`。使用 `COLLECT/onedir`，`console=False`，`upx=False`，所有工具共享内置解释器和 GIS DLL。pywebview 的实际导入包名是 `webview`，spec 按此收集资源、Qt WebEngine（PySide6）；排除 Python.NET/CLR 和 WinForms 后端。
 
 `tools` 中的缓存、`.git`、`.venv`、测试日志不打进安装目录。开发机安装依赖和构建需要联网；同事运行四个本地工具不需要联网。
 
@@ -124,7 +124,7 @@ py -3.11 -m venv .venv
   logs/<tool_id>.log        各工具服务日志
   temp/<tool-id>-<随机串>/  每次服务的临时目录，正常关闭清理
   streamlit/               Streamlit 用户配置/凭据路径
-  webview/                 WebView2 缓存与用户配置
+  webview/                 Qt WebEngine 缓存与用户配置
 ```
 
 用户目录不可写时回退到系统 temp 的 `GISToolbox/`。日志入口会打开实际使用的日志目录。断电或强制结束造成的临时目录可能需要手动清理，程序不会误删其他用户数据。下载到哪里由用户在系统保存对话框中选择。
@@ -160,7 +160,7 @@ Pop-Location
 
 ## 发布前验收清单
 
-- [ ] 干净的 Windows 10/11 x64、无 Python/QGIS，确认 WebView2 可用。
+- [ ] 干净的 Windows 10/11 x64、无 Python/QGIS，确认内置 Qt WebEngine 可用。
 - [ ] 主界面准确列出四个工具，未包含 NDVI/回退功能。
 - [ ] 三个 GIS 工具各完成典型上传、处理和结果下载。
 - [ ] 坐标计算器在断网状态可打开，测试格式转换、分带和复制。
@@ -174,19 +174,19 @@ Pop-Location
 
 ## 常见问题
 
-**首次打开较慢**：GIS DLL、Streamlit 和 WebView2 初始化可能需 10–20 秒，具体取决于磁盘、杀毒软件和电脑。onedir 运行时不需要像 onefile 一样每次解压。默认服务启动上限 30 秒，可在 config 中调整后重新构建。
+**首次打开较慢**：GIS DLL、Streamlit 和 Qt WebEngine 初始化可能需 10–20 秒，具体取决于磁盘、杀毒软件和电脑。onedir 运行时不需要像 onefile 一样每次解压。默认服务启动上限 30 秒，可在 config 中调整后重新构建。
 
 **杀毒软件误报**：未签名 PyInstaller 程序可能被误报。应先核对来源和扫描结果，企业分发建议代码签名并提交误报审核；如需白名单请按单位规范由管理员处理，不建议关闭安全软件。
 
 **端口冲突**：自动回退至 8501–8600；全部占用时会提示关闭其他程序。没有端口的静态工具仍可使用。
 
-**WebView2 缺失/白屏**：安装官方 Evergreen Runtime，再重新启动；公司策略禁用 WebView2 时联系管理员。日志位于用户目录。
+**启动失败/白屏**：确认使用 Windows 10/11 64 位并完整解压全部文件，不要单独复制 EXE。不要混用不同版本的 _internal。查看 %APPDATA%\GISToolbox\logs\app.log；v1.1.0-rc.2 已移除产生 Python.Runtime.Loader.Initialize 错误的 CLR 启动链。
 
 **ogr2ogr 找不到**：使用 Fiona 备用流程即可；需要 CLI 时使用完整的 QGIS/GDAL 环境并配置 PATH，或按 vendor 文档重新打包。
 
 **GDAL/PROJ DLL 错误**：使用新的独立 venv，确认 collect_all 和标准 PyInstaller hooks 生效。不要把系统 QGIS DLL 复制进 Fiona 包目录。PROJ 数据库必须对应当前发行版。
 
-**下载没有弹框**：本程序已启用 pywebview `ALLOW_DOWNLOADS`。检查保存对话框是否在窗口后面，或查看 WebView2/工具日志。
+**下载没有弹框**：本程序已启用 pywebview `ALLOW_DOWNLOADS`。检查保存对话框是否在窗口后面，或查看应用/工具日志。
 
 **再次双击没打开**：单实例锁阻止重复启动，从任务栏切换到已有工具箱。锁文件存在本身不是运行中标志，无需手动删除它。
 
@@ -196,10 +196,10 @@ Pop-Location
 
 ## 1.1 新增工作区
 
-打开“耕地地块周边地物分析”，在侧栏选择“矢量配色与转换”。该入口独立处理上传文件，无需先分析耕地。
+打开“耕地地块周边地物分析”，在侧栏选择“矢量字段配色”。该入口独立处理上传文件，无需先分析耕地。
 
 - 配色：上传 GeoJSON 或 Shapefile ZIP → 查看属性 → 选择字段 → 选择字段值并设置颜色 → 设置线宽与面填充不透明度 → 生成并下载 GeoJSON。输出 WGS84。
-- GeoJSON 转 SHP：切换处理方式 → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
+- GeoJSON 转 SHP：打开“SHP 转 KML / KMZ”，切换处理方式 → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
 - 配色使用 SimpleStyle 的 stroke、fill、marker-color 等属性。GeoJSON 本身没有统一显示样式标准；奥维 10.6.2 实机结果：点和面样式可显示，线样式未按 stroke 显示。Shapefile 转换仅保存几何与属性，不携带渲染样式。
 - 中国路网：[Geofabrik 中国下载页](https://download.geofabrik.de/asia/china.html)。使用省级 Shapefile ZIP 的道路图层；工具不直接读取 .osm.pbf。仅有 fclass 时按页面说明映射到 highway。
 

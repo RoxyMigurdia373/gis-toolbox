@@ -1,4 +1,4 @@
-# 本机验证记录 · 1.0.0
+# 本机验证记录 · 1.1.0-rc.2
 
 日期：2026-10-16。Windows x64，Python 3.12.14；发布目录内置运行时，同事无需安装 Python。
 
@@ -29,19 +29,27 @@
 
 ## 尚未覆盖的验收环境
 
-- 没有提供干净 Windows 10/11 虚拟机；本机测试不能保证所有系统版本、公司策略或 WebView2 环境均已验收。
+- 没有提供干净 Windows 10/11 虚拟机；本机测试不能保证所有系统版本、公司策略或驱动环境均已验收。
 - 耕地与切分的算法/导出由上述完整测试覆盖；打包版已验证页面渲染，未完成这两页的全部原生文件对话框端到端人工操作。
 - 开发机没有独立 ogr2ogr，因此实测的是 Fiona 备用流程；没有测试可选的独立 GDAL CLI 包。
 - 未执行超大文件、内存极限和长期多用户压力测试。
 
-WebView2 为系统运行组件，当前包不包含安装器。源项目目录保持原样，桌面兼容改动仅位于 gis-toolbox 的副本。
+Qt WebEngine 随发布包分发，当前包不要求另装 WebView2、Python、.NET 或 QGIS。源项目目录保持原样，桌面兼容改动仅位于 gis-toolbox 的副本。
+
+## 1.1.0-rc.2 增量验证（2026-10-17）
+
+- PySide6 6.8.3 + pywebview 6.2.1 Qt WebEngine onedir 包构建成功；发布版从 `dist/GISToolbox/GISToolbox.exe` 启动成功，主界面四个工具卡片正常显示。
+- 发布版打开“SHP 转 KML / KMZ”后可切换“GeoJSON 转 SHP”；导入 `artifacts/ovi-style-test.geojson`，读取 3 个要素和中文字段，生成 Shapefile ZIP 并显示下载按钮。
+- Qt6 保存下载适配单元测试 2 项通过；已验证 GeoJSON 转换结果 ZIP 含 `.shp/.shx/.dbf/.prj/.cpg` 及字段映射。
+- 旧版错误来自 Python.NET/.NET Framework 的 `Python.Runtime.dll` 加载链；rc.2 不再使用 WinForms、CLR 或 Python.NET 作为窗口后端。
+- 当前实际验证环境：Windows 11 专业版 10.0.26100 x64；未完成干净 Windows 10/11 虚拟机验收，因此不承诺所有系统策略、驱动和杀毒软件环境。
 
 
 ## 1.1.0-rc.1 增量验证（2026-10-17）
 
 - 耕地模块 unittest：23 项通过（原 17 项 + 新 6 项）。覆盖按字段配色、空值与类型区分、属性/坐标保留、覆盖既有样式的明确选择、非法参数、GeoJSON → SHP 中文与混合几何往返、界面切换和修改配置后下载失效。
 - 容器 unittest：6 项通过；矢量分片 pytest：43 项通过；SHP 转换 unittest：3 项及批量界面测试通过；坐标核心 Node 校验通过。
-- 使用真实 WebView2 窗口检查新版主界面、分析界面的中国路网链接，以及矢量配色工作区切换。
+- 使用真实 Qt WebEngine 窗口检查新版主界面、分析界面的中国路网链接，以及矢量配色工作区切换。
 - 奥维 10.6.2 实机导入已完成。本版本使用 SimpleStyle 字段；点和面样式可显示，线的 stroke 未按设定颜色显示，仍标记为预发布。
 - 未完成干净 Windows 虚拟机验证。
 

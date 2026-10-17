@@ -1,7 +1,7 @@
 {
   "id": "farmland_context",
   "name": "耕地地块周边地物分析",
-  "description": "耕地周边分析、矢量字段配色、GeoJSON 转 SHP 与路网数据入口",
+  "description": "耕地周边分析、矢量字段配色 与路网数据入口",
   "type": "streamlit",
   "entry": "app.py",
   "icon": "assets/icon.png",

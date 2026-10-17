@@ -1,19 +1,18 @@
-"""独立上传矢量的字段配色与 GeoJSON → Shapefile 工作区。"""
+"""独立上传矢量的字段配色 工作区。"""
 import hashlib
 import json
 
 import pandas as pd
 import streamlit as st
 
-from io_utils import read_vector, export_shapefile
+from io_utils import read_vector
 from vector_styles import PALETTE, STYLE_FIELDS, categories, styled_geojson
 
 
 def render_vector_workspace():
-    st.subheader('矢量字段配色与格式转换')
-    st.caption('无需运行周边分析。上传矢量后查看属性、按字段值指定颜色，或将 GeoJSON 转为 Shapefile ZIP。')
-    mode = st.radio('处理方式', ['按字段配色导出 GeoJSON', 'GeoJSON 转 SHP'], horizontal=True)
-    upload = st.file_uploader('上传待转换的矢量文件', type=['geojson', 'json', 'zip'] if mode.startswith('按') else ['geojson', 'json'], key='vector_upload')
+    st.subheader('矢量字段配色')
+    st.caption('无需运行周边分析。上传矢量后查看属性、按字段值指定颜色。')
+    upload = st.file_uploader('上传待转换的矢量文件', type=['geojson', 'json', 'zip'], key='vector_upload')
     if upload is None:
         st.info('请选择一个 GeoJSON 文件；配色也支持包含完整配套文件的 Shapefile ZIP。')
         return
@@ -35,15 +34,7 @@ def render_vector_workspace():
         fields = [c for c in frame.columns if c != frame.geometry.name]
         st.caption(f'{len(frame):,} 个要素 / {len(fields)} 个属性字段 / 源坐标系：{frame.crs}')
         st.dataframe(pd.DataFrame(frame[fields].head(100)), use_container_width=True, hide_index=True)
-        if mode == 'GeoJSON 转 SHP':
-            st.caption('导出 WGS84（EPSG:4326）。点、线、面按几何类型分开；ZIP 包含 SHP 配套文件和字段映射。Shapefile 不保存显示样式。')
-            if st.button('生成 Shapefile ZIP', type='primary'):
-                with st.spinner('正在转换…'):
-                    st.session_state.vector_shp = export_shapefile(frame)
-            if st.session_state.get('vector_shp'):
-                st.download_button('下载 Shapefile ZIP', st.session_state.vector_shp, 'converted_shapefile.zip', 'application/zip')
-            return
-        st.info('GeoJSON 使用通用 SimpleStyle 颜色字段。奥维 10.6.2 是否读取这些字段尚待实际导入验证；导出成功不代表导入后一定显示颜色。')
+        st.info('奥维 10.6.2 样例导入中，点和面显示了预期颜色，但线颜色未按设置显示；线样式兼容性仍待完善。')
         if not fields:
             st.warning('没有可用于分类的属性字段。')
             return

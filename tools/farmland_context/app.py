@@ -29,8 +29,8 @@ def clear_result():
 
 from vector_workspace import render_vector_workspace
 
-workspace = st.sidebar.radio("工作区", ["耕地周边分析", "矢量配色与转换"])
-if workspace == "矢量配色与转换":
+workspace = st.sidebar.radio("工作区", ["耕地周边分析", "矢量字段配色"])
+if workspace == "矢量字段配色":
     render_vector_workspace()
     st.stop()
 

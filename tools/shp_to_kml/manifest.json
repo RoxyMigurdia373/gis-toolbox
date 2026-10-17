@@ -1,7 +1,7 @@
 {
   "id": "shp_to_kml",
   "name": "SHP 转 KML / KMZ",
-  "description": "批量转换 Shapefile 为 KML/KMZ，处理中文编码与坐标系",
+  "description": "批量 SHP 转 KML/KMZ、GeoJSON 转 SHP，处理中文编码与坐标系",
   "type": "streamlit",
   "entry": "app.py",
   "icon": "assets/icon.png",
