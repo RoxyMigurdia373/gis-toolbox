@@ -200,7 +200,7 @@ Pop-Location
 
 - 配色：上传 GeoJSON 或 Shapefile ZIP → 查看属性 → 选择字段 → 选择字段值并设置颜色 → 设置线宽与面填充不透明度 → 生成并下载 GeoJSON。输出 WGS84。
 - GeoJSON 转 SHP：切换处理方式 → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
-- 配色使用 SimpleStyle 的 stroke、fill、marker-color 等属性。GeoJSON 本身没有统一显示样式标准；奥维 10.6.2 兼容性仍待实机验证。Shapefile 转换仅保存几何与属性，不携带渲染样式。
+- 配色使用 SimpleStyle 的 stroke、fill、marker-color 等属性。GeoJSON 本身没有统一显示样式标准；奥维 10.6.2 实机结果：点和面样式可显示，线样式未按 stroke 显示。Shapefile 转换仅保存几何与属性，不携带渲染样式。
 - 中国路网：[Geofabrik 中国下载页](https://download.geofabrik.de/asia/china.html)。使用省级 Shapefile ZIP 的道路图层；工具不直接读取 .osm.pbf。仅有 fclass 时按页面说明映射到 highway。
 
 ## 版本历史与备份
