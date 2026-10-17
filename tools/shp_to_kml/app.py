@@ -8,6 +8,10 @@ from pyproj import CRS
 from converter import MAX_UPLOAD, extract, sidecar, convert, package
 
 st.set_page_config(page_title='SHP 转 KML / KMZ', page_icon='🗺️', layout='wide')
+from pathlib import Path as _ThemePath
+_theme = _ThemePath(__file__).resolve().parents[2] / "ui" / "streamlit.css"
+if _theme.is_file():
+    st.markdown("<style>" + _theme.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.title('🗺️ SHP 转 KML / KMZ')
 st.caption('中文属性 · WGS84 经纬度 · 批量上传、转换、下载 · 无需登录')
 st.warning('每个 ZIP 上传上限 1 GB（1024 MB），多个上传文件会累计占用内存。云端内存有限，允许上传不代表能处理任意 1 GB 文件；大文件建议在本机运行。解压总量上限 4 GB。')

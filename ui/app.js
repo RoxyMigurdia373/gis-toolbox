@@ -20,7 +20,7 @@ function update(states) {
     const running = state.status === 'running';
     if (opening || running) active++;
     card.open.disabled = opening;
-    card.open.textContent = state.status === 'starting' ? '正在启动…' : state.status === 'closing' ? '正在关闭…' : running ? '已打开 · 切换窗口 ↗' : '打开工具 ↗';
+    card.open.textContent = state.status === 'starting' ? '正在启动…' : state.status === 'closing' ? '正在关闭…' : running ? '切换到工具' : '打开工具';
     card.close.hidden = !running;
     card.status.textContent = {starting:'启动中', closing:'关闭中', running:'运行中', error:'启动异常', closed:'可使用'}[state.status] || state.status;
     card.status.className = `pill ${state.status}`;

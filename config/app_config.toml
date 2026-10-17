@@ -1,5 +1,5 @@
 name = "GIS 工具箱"
-version = "1.0.0"
+version = "1.1.0-rc.1"
 base_port = 8501
 max_port = 8600
 startup_timeout = 30

@@ -3,10 +3,12 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from backup_version import backup
 
 
 if __name__ == '__main__':
     root = Path(__file__).resolve().parents[1]
+    backup(root)
     for name in ('build', 'dist'):
         path = root / name
         resolved = path.resolve()

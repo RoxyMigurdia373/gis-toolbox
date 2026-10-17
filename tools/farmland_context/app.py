@@ -14,6 +14,10 @@ from io_utils import combine_frames, export_geojson, export_shapefile, read_vect
 from materials import extraction_area, normalize_layer, extract_materials
 
 st.set_page_config(page_title="耕地地块周边地物分析工具", page_icon="🌾", layout="wide")
+from pathlib import Path as _ThemePath
+_theme = _ThemePath(__file__).resolve().parents[2] / "ui" / "streamlit.css"
+if _theme.is_file():
+    st.markdown("<style>" + _theme.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.title("耕地地块周边地物分析工具")
 st.caption("离线空间分析 · 无需地图服务 · 距离单位：米")
 st.info("本地运行时文件保留在本机；使用云端部署时，上传文件由该服务器处理。不会调用第三方地图服务。")
@@ -22,6 +26,13 @@ st.info("本地运行时文件保留在本机；使用云端部署时，上传�
 def clear_result():
     st.session_state.pop("analysis_result", None)
 
+
+from vector_workspace import render_vector_workspace
+
+workspace = st.sidebar.radio("工作区", ["耕地周边分析", "矢量配色与转换"])
+if workspace == "矢量配色与转换":
+    render_vector_workspace()
+    st.stop()
 
 with st.sidebar:
     st.header("分析设置")
@@ -51,6 +62,8 @@ with st.sidebar:
     auto_repair = st.checkbox("自动修复无效几何", value=True, on_change=clear_result)
     st.caption("尝试修复自相交等问题；空几何和无法修复的记录会跳过，不进入结果。修复可能改变形状，请复核处理明细。")
 
+st.markdown("**路网数据下载：** [Geofabrik 中国 OSM 数据](https://download.geofabrik.de/asia/china.html)")
+st.caption("可进入省级页面获取数据。请下载 Shapefile ZIP 并选用道路图层；本工具不直接读取 .osm.pbf。若道路图层只有 fclass 字段，请按下方说明转换为 highway 字段。数据来源：© OpenStreetMap contributors，遵循 ODbL。")
 st.caption("上传耕地图斑和周边地物，点击“开始分析”。首次使用可展开下方说明。")
 with st.expander("使用说明 · 数据要求与分类规则", expanded=False):
     input_tab, class_tab, result_tab = st.tabs(["文件与字段要求", "道路分类对照", "分析与结果规则"])

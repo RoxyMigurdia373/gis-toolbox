@@ -1,6 +1,6 @@
 # GIS 工具箱 · Windows 本地桌面版
 
-版本 **1.0.0**，2026-10-16。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
+版本 **1.1.0-rc.1（预发布）**。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
 
 ## 当前收录的四个工具
 
@@ -75,7 +75,7 @@ py -3.11 -m venv .venv
 
 ## 打包
 
-双击 **build.bat**。它会创建 `.venv`（优先 3.11，回退 3.12）、安装锁定依赖、清理项目自己的 `build`/`dist` 后运行 PyInstaller。**重新构建会替换旧 dist，请先另存准备保留的旧发布版。**
+双击 **build.bat**。它会创建 `.venv`（优先 3.11，回退 3.12）、安装锁定依赖、清理项目自己的 `build`/`dist` 后运行 PyInstaller。**重新构建前自动备份源码和现有 dist 到同级 gis-toolbox-backups，校验成功后才替换构建目录。**
 
 也可手动执行：
 
@@ -193,3 +193,18 @@ Pop-Location
 ## 更新说明
 
 1.0.0：整合三个现有 Streamlit 工具与仓库版坐标计算器；新增本地窗口、manifest 注册、端口回退、单实例、日志、进程回收及 onedir 构建。升级时替换整个发布文件夹，用户日志与 WebView 缓存保存在用户目录。
+
+## 1.1 新增工作区
+
+打开“耕地地块周边地物分析”，在侧栏选择“矢量配色与转换”。该入口独立处理上传文件，无需先分析耕地。
+
+- 配色：上传 GeoJSON 或 Shapefile ZIP → 查看属性 → 选择字段 → 选择字段值并设置颜色 → 设置线宽与面填充不透明度 → 生成并下载 GeoJSON。输出 WGS84。
+- GeoJSON 转 SHP：切换处理方式 → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
+- 配色使用 SimpleStyle 的 stroke、fill、marker-color 等属性。GeoJSON 本身没有统一显示样式标准；奥维 10.6.2 兼容性仍待实机验证。Shapefile 转换仅保存几何与属性，不携带渲染样式。
+- 中国路网：[Geofabrik 中国下载页](https://download.geofabrik.de/asia/china.html)。使用省级 Shapefile ZIP 的道路图层；工具不直接读取 .osm.pbf。仅有 fclass 时按页面说明映射到 highway。
+
+## 版本历史与备份
+
+[GitHub Releases](https://github.com/RoxyMigurdia373/gis-toolbox/releases) 提供各版本源码、Windows 包和校验清单。详见 [更新日志](CHANGELOG.md) 和 [发布与回退流程](docs/RELEASES.md)。发布脚本读取配置版本号，按版本建目录且拒绝覆盖旧发布包。
+
+UI 设计参考 [frontend-design skill](https://github.com/anthropics/skills/tree/main/skills/frontend-design)，见 [设计说明](docs/DESIGN.md)。运行软件不需要安装此 skill。
