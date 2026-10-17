@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GIS 工具箱</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">◈</span><div><h1 id="app-name">GIS 工具箱</h1><span class="tagline">让地理数据处理更简单</span></div></div>
+    <span class="version" id="version">本地桌面版</span>
+  </header>
+  <main>
+    <div class="intro"><div><span class="eyebrow">YOUR GIS WORKSPACE</span><h2>选择工具，开始工作</h2><p>独立窗口 · 本地处理 · 支持同时使用</p></div><span class="local"><i></i> 本地工作空间</span></div>
+    <div id="message" class="message" role="status" hidden></div>
+    <section class="tools" id="tools" aria-label="工具列表"><p id="loading">正在连接桌面服务…</p></section>
+    <div class="hint"><span aria-hidden="true">ⓘ</span><span>文件在本机处理。关闭工具窗口只结束当前工具，关闭工具箱将一并结束所有工具。</span></div>
+  </main>
+  <footer><span id="summary">准备就绪</span><nav aria-label="应用操作"><button id="logs">日志文件夹</button><button id="about">关于</button><span class="divider"></span><button id="quit">退出工具箱</button></nav></footer>
+  <dialog id="about-dialog"><div class="dialog-mark">◈</div><h2>GIS 工具箱</h2><p id="about-version"></p><p>常用地理数据工具，一个本地工作空间。</p><p class="muted">上传与分析均在本机进行。结果需要在各工具内下载保存。关闭工具将清除该工具当前会话。</p><button class="primary" id="close-about">知道了</button></dialog>
+  <script src="app.js"></script>
+</body>
+</html>

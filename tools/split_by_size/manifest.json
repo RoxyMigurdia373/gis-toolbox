@@ -1,0 +1,10 @@
+{
+  "id": "split_by_size",
+  "name": "按文件大小切分矢量数据",
+  "description": "将 GeoJSON、SHP、GPKG 按指定体积拆分，生成分片 ZIP 与清单",
+  "type": "streamlit",
+  "entry": "app.py",
+  "icon": "assets/icon.png",
+  "port_preference": 8502,
+  "working_dir": "tools/split_by_size"
+}

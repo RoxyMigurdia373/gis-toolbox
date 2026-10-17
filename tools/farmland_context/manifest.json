@@ -1,0 +1,10 @@
+{
+  "id": "farmland_context",
+  "name": "耕地地块周边地物分析",
+  "description": "提取 OSM 地物，计算到公路、铁路、村庄的距离，导出 GeoJSON/SHP",
+  "type": "streamlit",
+  "entry": "app.py",
+  "icon": "assets/icon.png",
+  "port_preference": 8501,
+  "working_dir": "tools/farmland_context"
+}

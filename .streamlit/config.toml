@@ -1,0 +1,19 @@
+[server]
+address = "127.0.0.1"
+headless = true
+fileWatcherType = "none"
+maxUploadSize = 500
+enableCORS = true
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
+
+[global]
+developmentMode = false
+
+[theme]
+primaryColor = "#167D8D"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F5F7"
+textColor = "#173541"

@@ -1,0 +1,11 @@
+{
+  "id": "shp_to_kml",
+  "name": "SHP 转 KML / KMZ",
+  "description": "批量转换 Shapefile 为 KML/KMZ，处理中文编码与坐标系",
+  "type": "streamlit",
+  "entry": "app.py",
+  "icon": "assets/icon.png",
+  "port_preference": 8503,
+  "working_dir": "tools/shp_to_kml",
+  "requires_ogr2ogr": true
+}

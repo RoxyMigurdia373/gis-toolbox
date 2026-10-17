@@ -1,0 +1,297 @@
+"""离线空间分类与最近距离分析；距离为图斑边界/内部到地物的最短距离。"""
+import json
+import re
+
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+from pyproj import CRS
+from shapely.strtree import STRtree
+from shapely import make_valid, get_coordinates
+from shapely.ops import unary_union
+
+OUTPUT_FIELDS = ["位置类型", "地物子类", "最近距离", "位置描述"]
+PRIORITY = {"铁路": 0, "公路": 1, "村庄": 2}
+ROAD_TYPES_ZH = {
+    "motorway": "高速公路", "motorway_link": "高速公路", "trunk": "国道", "trunk_link": "国道",
+    "primary": "省道", "primary_link": "省道", "secondary": "县道", "secondary_link": "县道",
+    "tertiary": "乡道", "tertiary_link": "乡道", "unclassified": "村道", "residential": "村道",
+    "service": "专用道路", "living_street": "村道", "road": "公路", "busway": "国道", "bus_guideway": "国道",
+    "track": "机耕道/生产路", "track_grade1": "机耕道/生产路", "track_grade2": "机耕道/生产路", "track_grade3": "机耕道/生产路", "track_grade4": "机耕道/生产路", "track_grade5": "机耕道/生产路",
+    "path": "田间小路", "footway": "人行道", "cycleway": "非机动车道", "steps": "人行道", "pedestrian": "人行道", "bridleway": "田间小路", "construction": "公路", "proposed": "公路",
+}
+
+
+def _value(value):
+    if value is None or (not isinstance(value, (dict, list)) and pd.isna(value)):
+        return ""
+    text = str(value).strip()
+    return "" if text.lower() in {"", "null", "none", "nan"} else text
+
+
+def _side(parcel, feature):
+    dx = parcel.centroid.x - feature.centroid.x
+    dy = parcel.centroid.y - feature.centroid.y
+    if abs(dx) >= abs(dy):
+        return "东侧" if dx >= 0 else "西侧"
+    return "北侧" if dy >= 0 else "南侧"
+
+
+def classify_features(frame, reset_index=True):
+    """标准字段优先，同时兼容大小写、osm_ 前缀、tags 和 other_tags。"""
+    types, subtypes, names = [], [], []
+    for row in frame.drop(columns=frame.geometry.name).to_dict("records"):
+        tags = {}
+        for key, value in row.items():
+            name = str(key).strip().lower()
+            if name in {"tags", "other_tags"}:
+                if isinstance(value, dict):
+                    tags.update({str(k).lower(): _value(v) for k, v in value.items()})
+                elif isinstance(value, str):
+                    try:
+                        parsed = json.loads(value)
+                        if isinstance(parsed, dict):
+                            tags.update({str(k).lower(): _value(v) for k, v in parsed.items()})
+                    except ValueError:
+                        tags.update(re.findall(r'"([^"]+)"\s*=>\s*"([^"]*)"', value))
+        for key, value in row.items():
+            name = str(key).strip().lower().removeprefix("osm_")
+            if name in {"railway", "highway", "place", "landuse", "name", "name:zh", "name_zh"} and _value(value):
+                tags[name] = _value(value)
+        if tags.get("railway"):
+            kind, subtype = "铁路", tags["railway"]
+        elif tags.get("highway"):
+            kind, subtype = "公路", tags["highway"]
+        elif tags.get("place", "").lower() in {"village", "hamlet", "town"}:
+            kind, subtype = "村庄", tags["place"]
+        elif tags.get("landuse", "").lower() == "residential":
+            kind, subtype = "村庄", "residential"
+        else:
+            kind, subtype = "", ""
+        types.append(kind)
+        subtypes.append(subtype)
+        names.append(tags.get("name:zh") or tags.get("name_zh") or tags.get("name") or "")
+    result = frame[[frame.geometry.name]].copy()
+    result["位置类型"], result["地物子类"] = types, subtypes
+    result["地物名称"] = names
+    result = result.loc[result["位置类型"] != ""]
+    return result.reset_index(drop=True) if reset_index else result
+
+
+def repair_geometry(frame, farmland=False):
+    """保留行属性及顺序，面修复后只保留面部分，不虚构空几何。"""
+    if frame.crs is None:
+        raise ValueError("缺少坐标系信息，自动修复不能补充坐标系。")
+    allowed = {"Polygon", "MultiPolygon"} if farmland else {
+        "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"
+    }
+    positions, geometries, issues = [], [], []
+    repaired = 0
+
+    def polygons(geometry):
+        if geometry.geom_type == "Polygon":
+            return [geometry]
+        return [p for part in getattr(geometry, "geoms", []) for p in polygons(part)]
+
+    for position, geometry in enumerate(frame.geometry):
+        reason, changed = "", False
+        if geometry is None or geometry.is_empty:
+            reason = "空几何，无法恢复坐标"
+        elif not np.isfinite(get_coordinates(geometry)).all():
+            reason = "坐标含非有限值，无法可靠修复"
+        else:
+            try:
+                if not geometry.is_valid:
+                    geometry = make_valid(geometry)
+                    changed = True
+                if farmland and geometry.geom_type in {"GeometryCollection", "MultiPolygon"}:
+                    geometry = unary_union(polygons(geometry))
+                    changed = True
+                if geometry.is_empty or geometry.geom_type not in allowed or not geometry.is_valid:
+                    reason = "修复后无可用面几何" if farmland else "修复后几何为空、无效或类型不支持"
+            except Exception:
+                reason = "几何修复失败"
+        if reason:
+            issues.append({"原始行号": position + 1, "处理": "跳过", "说明": reason})
+            continue
+        if changed:
+            repaired += 1
+            issues.append({"原始行号": position + 1, "处理": "已修复", "说明": "已修复拓扑或提取面部分，请复核形状"})
+        positions.append(position)
+        geometries.append(geometry)
+    output = frame.iloc[positions].copy()
+    output.geometry = gpd.GeoSeries(geometries, index=output.index, crs=frame.crs)
+    return output.reset_index(drop=True), {
+        "输入数": len(frame), "修复数": repaired, "跳过数": len(frame) - len(output), "保留数": len(output)
+    }, issues
+
+
+def validate_geometry(frame, farmland=False):
+    if frame.empty:
+        raise ValueError("矢量文件中没有地物。")
+    if frame.crs is None:
+        raise ValueError("缺少坐标系信息，请补充正确的 .prj 或 GeoJSON CRS 后重试。")
+    bad = frame.geometry.isna() | frame.geometry.is_empty | ~frame.geometry.is_valid
+    if bad.any():
+        raise ValueError(f"发现 {int(bad.sum())} 个空或无效几何，请勾选侧边栏“自动修复无效几何”后重试，或在 GIS 软件中修复。")
+    allowed = {"Polygon", "MultiPolygon"} if farmland else {
+        "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"
+    }
+    if not frame.geom_type.isin(allowed).all():
+        raise ValueError("耕地图斑必须全部为 Polygon / MultiPolygon。" if farmland else "OSM 数据包含不支持的几何类型。")
+    if not np.isfinite(frame.total_bounds).all():
+        raise ValueError("几何坐标存在非有限值。")
+
+
+def _project(frame, crs):
+    projected = frame.to_crs(crs)
+    if not np.isfinite(get_coordinates(projected.geometry.to_numpy())).all():
+        raise ValueError("坐标投影产生无效坐标。")
+    # 投影的浮点误差可能使原本有效、边界近乎接触的面发生自相交。
+    # 仅修复受影响行，保留属性、顺序和记录数，不能静默丢弃地块。
+    bad = ~projected.geometry.is_valid
+    if bad.any():
+        for position in np.flatnonzero(bad.to_numpy()):
+            source = frame.geometry.iloc[position]
+            repaired = make_valid(projected.geometry.iloc[position])
+            if source.geom_type in {"Polygon", "MultiPolygon"}:
+                def parts(geom):
+                    if geom.geom_type == "Polygon":
+                        return [geom]
+                    return [p for child in getattr(geom, "geoms", []) for p in parts(child)]
+                repaired = unary_union(parts(repaired))
+            if repaired.is_empty or not repaired.is_valid:
+                raise ValueError(f"投影后第 {position + 1} 条几何修复失败。")
+            projected.iat[position, projected.columns.get_loc(projected.geometry.name)] = repaired
+    return projected
+
+
+def normalize_radii(values):
+    if isinstance(values, str):
+        values = re.split(r"[,，;；\s]+", values.strip())
+    try:
+        radii = sorted(set(float(v) for v in values), reverse=True)
+    except (ValueError, TypeError):
+        raise ValueError("范围请输入正数，多个范围用逗号分隔，例如 200, 500, 1000。")
+    if not radii or any(not np.isfinite(r) or r <= 0 for r in radii):
+        raise ValueError("每个范围必须是大于 0 的有限数值。")
+    return radii
+
+
+def range_field(radius):
+    return f"邻近路网（{format(radius, '.15g')}米）"
+
+
+def analyze(farmland, features, threshold=None, progress=None, chunk_size=5000,
+            show_direction=False, show_distance=False, dual_range=False, center_coords=False, radii=None):
+    validate_geometry(farmland, farmland=True)
+    validate_geometry(features)
+    if threshold is not None and (not np.isfinite(threshold) or threshold < 0):
+        raise ValueError("最大距离阈值必须为非负有限数值。")
+    if chunk_size < 1:
+        raise ValueError("分块大小必须大于零。")
+    radii = normalize_radii([200, 500] if radii is None else radii) if dual_range else []
+    extra_fields = ([range_field(r) for r in radii] if dual_range else []) + (["中心经度", "中心纬度"] if center_coords else [])
+    collisions = set(OUTPUT_FIELDS + extra_fields).intersection(farmland.columns)
+    if collisions:
+        raise ValueError(f"输入已含输出字段：{'、'.join(sorted(collisions))}，请先重命名以免覆盖原属性。")
+    warnings = []
+    warnings.append("投影后如出现自相交，会自动修复并保留记录；边界精度敏感的图斑请复核导出形状。")
+    try:
+        result = _project(farmland, 4326).reset_index(drop=True)
+    except Exception as exc:
+        raise ValueError("无法转换到 WGS84，请检查源坐标系定义。") from exc
+    west, south, east, north = result.total_bounds
+    if west < -180 or east > 180 or south < -90 or north > 90:
+        raise ValueError("WGS84 坐标超出经纬度范围，请检查源坐标系。")
+    if east - west > 6 or north - south > 8:
+        warnings.append("数据跨度较大，单一局部投影可能存在明显距离偏差，建议按地区分批分析。")
+    try:
+        metric_crs = result.estimate_utm_crs()
+        if metric_crs is None:
+            raise ValueError("无法确定 UTM 带")
+        land_m, osm_m = _project(result, metric_crs), _project(features, metric_crs)
+    except Exception:
+        # WGS84 经纬度不是米；回退到基于 WGS84 的局部等距投影。
+        try:
+            metric_crs = CRS.from_proj4(
+                f"+proj=aeqd +lat_0={(south+north)/2} +lon_0={(west+east)/2} +datum=WGS84 +units=m"
+            )
+            land_m, osm_m = _project(result, metric_crs), _project(features, metric_crs)
+        except Exception as exc:
+            raise ValueError("UTM 和 WGS84 局部近似投影均失败，请检查数据坐标系及范围。") from exc
+        warnings.append("UTM 投影失败，已回退到基于 WGS84 的局部等距投影；距离为近似值，可能存在偏差。")
+    tree = STRtree(osm_m.geometry.to_numpy())
+    records = []
+    range_records = {r: [] for r in radii}
+    category_trees = {}
+    if dual_range:
+        labels = [ROAD_TYPES_ZH.get(str(row["地物子类"]).strip().lower(), "公路")
+                  if row["位置类型"] == "公路" else row["位置类型"]
+                  for _, row in osm_m.iterrows()]
+        order = list(dict.fromkeys(ROAD_TYPES_ZH.values())) + ["铁路", "村庄"]
+        for label in order:
+            positions = [i for i, value in enumerate(labels) if value == label]
+            if positions:
+                category_trees[label] = STRtree(osm_m.geometry.iloc[positions].to_numpy())
+    for start in range(0, len(land_m), chunk_size):
+        geometries = land_m.geometry.iloc[start:start + chunk_size].to_numpy()
+        if dual_range:
+            hits = {radius: [[] for _ in geometries] for radius in radii}
+            # 每个中文类别只查最近距离：可判定该类别是否在范围内，避免密集区域的全配对爆内存。
+            for label, category_tree in category_trees.items():
+                indices, category_distances = category_tree.query_nearest(
+                    geometries, max_distance=max(radii), return_distance=True, all_matches=False)
+                for parcel, distance in zip(indices[0], category_distances):
+                    for radius in radii:
+                        if distance <= radius:
+                            hits[radius][parcel].append(label)
+            for radius in radii:
+                range_records[radius].extend("、".join(values) for values in hits[radius])
+        pairs, distances = tree.query_nearest(geometries, return_distance=True, all_matches=True)
+        # 同距离按铁路、公路、村庄排序，然后按输入顺序稳定选择。
+        candidates = pd.DataFrame({"parcel": pairs[0], "feature": pairs[1], "distance": distances})
+        candidates["priority"] = osm_m["位置类型"].iloc[pairs[1]].map(PRIORITY).to_numpy()
+        chosen = candidates.sort_values(["parcel", "distance", "priority", "feature"]).drop_duplicates("parcel")
+        for item in chosen.itertuples():
+            feature = osm_m.iloc[item.feature]
+            kind, subtype = feature["位置类型"], feature["地物子类"]
+            distance = float(item.distance)
+            outside_threshold = threshold is not None and distance > threshold
+            if outside_threshold and not dual_range:
+                kind, subtype, description = "无", "", "不在公路、铁路或村庄周边"
+            else:
+                if kind == "公路":
+                    label = ROAD_TYPES_ZH.get(str(subtype).strip().lower(), "公路")
+                elif kind == "铁路":
+                    label = "铁路"
+                else:
+                    village = _value(feature.get("地物名称"))
+                    label = f"{village}居民点" if village else "村庄"
+                if show_direction:
+                    side = _side(land_m.geometry.iloc[start + item.parcel], feature.geometry)
+                    description = f"位于{label}{side}"
+                else:
+                    description = f"{label}旁"
+                if show_distance and distance > 0.005:
+                    description += f"约{distance:.2f}米"
+            if dual_range and outside_threshold:
+                kind, subtype, description = "无", "", "不在公路、铁路或村庄周边"
+            records.append((kind, subtype, round(distance, 2), description))
+        if progress:
+            progress(min(start + chunk_size, len(land_m)) / len(land_m))
+    result[OUTPUT_FIELDS] = pd.DataFrame(records, columns=OUTPUT_FIELDS, index=result.index)
+    if dual_range:
+        for radius in radii:
+            result[range_field(radius)] = range_records[radius]
+    if center_coords:
+        centers = gpd.GeoSeries(land_m.geometry.centroid, crs=metric_crs).to_crs(4326)
+        result["中心经度"] = centers.x.round(8).to_numpy()
+        result["中心纬度"] = centers.y.round(8).to_numpy()
+    return result, warnings, metric_crs.to_string()
+
+
+def summarize(result):
+    return result.groupby("位置类型", sort=False).agg(
+        地块数=("位置类型", "size"), 平均距离_米=("最近距离", "mean")
+    ).round(2).reset_index()

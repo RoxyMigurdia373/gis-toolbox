@@ -1,0 +1,9 @@
+name = "GIS 工具箱"
+version = "1.0.0"
+base_port = 8501
+max_port = 8600
+startup_timeout = 30
+window_width = 1120
+window_height = 900
+tool_width = 1280
+tool_height = 880

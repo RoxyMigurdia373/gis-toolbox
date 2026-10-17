@@ -1,0 +1,9 @@
+{
+  "id": "coordinate_converter",
+  "name": "坐标转换计算器",
+  "description": "度分秒、十进制度、度分互转，自动推荐 UTM 与 CGCS2000 投影分带",
+  "type": "static",
+  "entry": "index.html",
+  "icon": "assets/icon.png",
+  "working_dir": "tools/coordinate_converter"
+}
