@@ -6,7 +6,7 @@
 
 | 工具 | 功能 | 运行方式 |
 | --- | --- | --- |
-| 耕地地块周边地物分析 | 提取 OSM 材料、最近距离、范围汇总、几何修复、中心经纬度、GeoJSON/SHP 导出 | 独立 Streamlit 进程 |
+| 耕地地块周边地物分析 | 提取 OSM 材料、最近距离、范围汇总、几何修复、中心经纬度、字段配色 GeoJSON 导出 | 独立 Streamlit 进程 |
 | 按文件大小切分矢量数据 | GeoJSON/SHP/GPKG 分片、类型与属性检查、可选坐标转换、ZIP 和清单 | 独立 Streamlit 进程 |
 | SHP 转 KML / KMZ | 批量转换、中文编码、坐标系处理、结果下载 | 独立 Streamlit 进程 |
 | 坐标转换计算器 | 度分秒/十进制度/度分互转、复制结果、UTM 与 CGCS2000 分带推荐 | 本地 HTML，无进程、无端口 |
@@ -192,14 +192,14 @@ Pop-Location
 
 ## 更新说明
 
-1.0.0：整合三个现有 Streamlit 工具与仓库版坐标计算器；新增本地窗口、manifest 注册、端口回退、单实例、日志、进程回收及 onedir 构建。升级时替换整个发布文件夹，用户日志与 WebView 缓存保存在用户目录。
+1.0.0：整合三个现有 Streamlit 工具与仓库版坐标计算器；新增本地窗口、manifest 注册、端口回退、单实例、日志、进程回收及 onedir 构建。升级时替换整个发布文件夹，用户日志与 Qt WebEngine 缓存保存在用户目录。
 
 ## 1.1 新增工作区
 
 打开“耕地地块周边地物分析”，在侧栏选择“矢量字段配色”。该入口独立处理上传文件，无需先分析耕地。
 
 - 配色：上传 GeoJSON 或 Shapefile ZIP → 查看属性 → 选择字段 → 选择字段值并设置颜色 → 设置线宽与面填充不透明度 → 生成并下载 GeoJSON。输出 WGS84。
-- GeoJSON 转 SHP：打开“SHP 转 KML / KMZ”，切换处理方式 → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
+- GeoJSON 转 SHP：打开“SHP 转 KML / KMZ”，选择“GeoJSON 转 SHP” → 上传 GeoJSON → 生成并下载 ZIP。不同几何类型分别保存，中文字段对应关系在 ZIP 内的字段映射.json 中。
 - 配色使用 SimpleStyle 的 stroke、fill、marker-color 等属性。GeoJSON 本身没有统一显示样式标准；奥维 10.6.2 实机结果：点和面样式可显示，线样式未按 stroke 显示。Shapefile 转换仅保存几何与属性，不携带渲染样式。
 - 中国路网：[Geofabrik 中国下载页](https://download.geofabrik.de/asia/china.html)。使用省级 Shapefile ZIP 的道路图层；工具不直接读取 .osm.pbf。仅有 fclass 时按页面说明映射到 highway。
 
