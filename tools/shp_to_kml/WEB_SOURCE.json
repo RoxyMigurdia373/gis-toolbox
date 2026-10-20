@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/RoxyMigurdia373/shp2kml.git",
+  "commit": "2e9488be75ace40bd903941b915b6fd8830b4176",
+  "files": {
+    ".streamlit/config.toml": "87a41922a99239362f06b434b816700d7c9503c30eff757fc0866255b53299fc",
+    "app.py": "16e671592674035c61d4f0aa7b3bb7a4e6a1f18e7c3e297b762e79ac9830c1c8",
+    "converter.py": "5e1d9ef4de8ecd2ea7678b1b5e9662d3df82923917c49b5f762d028e1996cdb1",
+    "geojson_workspace.py": "e3419f7a6e0a14df97c380c731ab45366f9ee19b3932d04773ef3a19fa877d85",
+    "make_samples.py": "2ecaca4f2239c75c289a0e3b1872575a3888c3d6c555a82619acc03038902dc3",
+    "style.css": "658ba34af3a3cb6feca46f530c93b556786e079b4fd796a65d0ced0ebd1d028b",
+    "test_batch_ui.py": "e4a51b52d1378f705d06763ebe3b2c48a6c83ded7e5bde34a45084393a1ef473",
+    "test_converter.py": "51bd7719c8a3f3a35d626e0091d803400433e2b331242fe7f67c0b09ff631089",
+    "test_geojson_ui.py": "9e5b0382c4c3844288066ab8d2b3a417fcf10cad6e0a84cfd62049620e5dab7b",
+    "vector_io.py": "746d292269843710d66ff23362eb0119f766cdb77d830614e5e2879b3bac0f72"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/RoxyMigurdia373/farmland-osm.git",
+  "commit": "815885495aae6b88ab22adde6c0286ec5da8875a",
+  "files": {
+    ".streamlit/config.toml": "4c7c8dc2a42d4632bd7c7f11cf4594b7954af4a97cc57e4cec8a95480f5093a3",
+    "analyzer.py": "a3110446ea7799a7742874a0ce5e48e7ed8be50fee2d110437c581868e9fb79c",
+    "app.py": "325c392906429342b9d87eb9302aeb393297b7f7b88b858caa07a8735a2749a0",
+    "io_utils.py": "746d292269843710d66ff23362eb0119f766cdb77d830614e5e2879b3bac0f72",
+    "materials.py": "d2e1a6497f432e0f90bde5f7654d3e32ffee34cefad6e30101fc3591d73642db",
+    "style.css": "658ba34af3a3cb6feca46f530c93b556786e079b4fd796a65d0ced0ebd1d028b",
+    "tests/test_app.py": "7e1a1485bc44a6bc93542250df377b924588233f8ddf45bd884d963c90c1cd6e",
+    "tests/test_materials.py": "e8ae947b2024af331ab3efaa66423e4d99f55ac366b8daa37fe2878f6bb31da2",
+    "tests/test_mixed_export.py": "c86b9efb1ee0f54c37e270f1ec62e9d3b2d6a7ef3528109d37ca0fa164cd6e32",
+    "tests/test_project.py": "8c1677f2713a70ad14b395f0af23d4609795b3502300476a717e87dbdcb7bf62",
+    "tests/test_ranges.py": "0024fd9b1318e5fd19f9829938220e2624edd0e92741fa290af44af82bdc9e22",
+    "tests/test_repair.py": "893e28f3a5115c549f1149c4867b74c9c786ad6db4806fd27e76639ce102461c",
+    "tests/test_vector_styles.py": "b2ecfa9e9b5bd4e0b67a557b1ce273dd82d3a0ad71c2890de3e6b83093c3d509",
+    "vector_styles.py": "d1fa1c26582d95a4bc9d21ba481460e0119f57feaff39bb185701e04ca6f433f",
+    "vector_workspace.py": "f076db67d55388ceab5dfbf36ced2ebd5da16f652a909f8ec7b6d16901f68078"
+  }
+}

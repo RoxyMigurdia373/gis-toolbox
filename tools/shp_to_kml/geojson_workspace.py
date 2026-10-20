@@ -1,20 +1,11 @@
 """GeoJSON 转 SHP；复用现有矢量读写实现，避免两个转换器行为分歧。"""
 import hashlib
-import importlib.util
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
 
-@st.cache_resource
-def vector_io():
-    # 按文件加载，避免不同工具中的同名 io_utils 模块冲突；打包包含整个 tools。
-    path = Path(__file__).resolve().parents[1] / 'farmland_context' / 'io_utils.py'
-    spec = importlib.util.spec_from_file_location('gis_vector_io', path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+from vector_io import read_vector, export_shapefile
 
 
 def render_geojson_workspace():
@@ -31,7 +22,7 @@ def render_geojson_workspace():
         if st.session_state.get('geojson_shp_identity') != identity:
             st.session_state.pop('geojson_shp_result', None)
             st.session_state.pop('geojson_shp_frame', None)
-            frame = vector_io().read_vector(data, upload.name)
+            frame = read_vector(data, upload.name)
             st.session_state.geojson_shp_frame = frame
             st.session_state.geojson_shp_identity = identity
         frame = st.session_state.geojson_shp_frame
@@ -43,7 +34,7 @@ def render_geojson_workspace():
         st.dataframe(pd.DataFrame(frame[fields].head(100)), hide_index=True, use_container_width=True)
         if st.button('生成 Shapefile ZIP', type='primary'):
             with st.spinner('正在转换…'):
-                st.session_state.geojson_shp_result = vector_io().export_shapefile(frame)
+                st.session_state.geojson_shp_result = export_shapefile(frame)
         if st.session_state.get('geojson_shp_result'):
             st.download_button('下载 Shapefile ZIP', st.session_state.geojson_shp_result,
                                'converted_shapefile.zip', 'application/zip')

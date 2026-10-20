@@ -15,7 +15,7 @@ from materials import extraction_area, normalize_layer, extract_materials
 
 st.set_page_config(page_title="耕地地块周边地物分析工具", page_icon="🌾", layout="wide")
 from pathlib import Path as _ThemePath
-_theme = _ThemePath(__file__).resolve().parents[2] / "ui" / "streamlit.css"
+_theme = _ThemePath(__file__).resolve().parent / "style.css"
 if _theme.is_file():
     st.markdown("<style>" + _theme.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.title("耕地地块周边地物分析工具")
@@ -62,7 +62,9 @@ with st.sidebar:
     auto_repair = st.checkbox("自动修复无效几何", value=True, on_change=clear_result)
     st.caption("尝试修复自相交等问题；空几何和无法修复的记录会跳过，不进入结果。修复可能改变形状，请复核处理明细。")
 
-st.markdown("**路网数据下载：** [Geofabrik 中国 OSM 数据](https://download.geofabrik.de/asia/china.html)")
+st.link_button("下载中国 OSM 路网数据（Geofabrik）", "https://download.geofabrik.de/asia/china.html")
+st.caption("点击后在浏览器打开；也可复制下方网址访问：")
+st.code("https://download.geofabrik.de/asia/china.html", language=None)
 st.caption("可进入省级页面获取数据。请下载 Shapefile ZIP 并选用道路图层；本工具不直接读取 .osm.pbf。若道路图层只有 fclass 字段，请按下方说明转换为 highway 字段。数据来源：© OpenStreetMap contributors，遵循 ODbL。")
 st.caption("上传耕地图斑和周边地物，点击“开始分析”。首次使用可展开下方说明。")
 with st.expander("使用说明 · 数据要求与分类规则", expanded=False):

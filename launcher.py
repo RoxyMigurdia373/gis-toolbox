@@ -39,7 +39,8 @@ def main():
         from main_window import create_main_window
         os.environ["QT_API"] = "pyside6"
         import webview
-        from qt_compat import configure_qt_downloads
+        from qt_compat import configure_qt_downloads, configure_webview_settings
+        configure_webview_settings(webview)
         configure_qt_downloads("qtwebengine")
 
         tools = load_manifests()
@@ -47,8 +48,6 @@ def main():
             raise RuntimeError("未找到可用工具，请检查 tools 目录和 manifest.json。")
         manager = ToolManager(tools, config, webview)
         create_main_window(manager, config)
-        webview.settings["ALLOW_DOWNLOADS"] = True
-        webview.settings["OPEN_EXTERNAL_LINKS_IN_BROWSER"] = False
         logging.info("启动 %s %s，工具 %s，用户目录 %s", config["name"], config["version"], list(tools), user_data_dir())
         webview.start(gui="qt", debug=False, http_server=False,
                       private_mode=False, storage_path=str(user_data_dir() / "webview"))

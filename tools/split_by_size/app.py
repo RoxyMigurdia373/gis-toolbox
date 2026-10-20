@@ -12,7 +12,7 @@ from splitter import split_vector
 
 st.set_page_config(page_title="按文件大小切分矢量数据", page_icon="🗺️", layout="wide")
 from pathlib import Path as _ThemePath
-_theme = _ThemePath(__file__).resolve().parents[2] / "ui" / "streamlit.css"
+_theme = _ThemePath(__file__).resolve().parent / "style.css"
 if _theme.is_file():
     st.markdown("<style>" + _theme.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
 st.title("按文件大小切分矢量数据")

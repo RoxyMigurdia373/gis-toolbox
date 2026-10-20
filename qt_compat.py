@@ -2,6 +2,13 @@
 from pathlib import Path
 
 
+def configure_webview_settings(webview):
+    webview.settings['ALLOW_DOWNLOADS'] = True
+    # Streamlit links use target=_blank. Qt's embedded-popup branch is broken
+    # in pywebview 6.2.1; open reference/download sites in the system browser.
+    webview.settings['OPEN_EXTERNAL_LINKS_IN_BROWSER'] = True
+
+
 def save_download(download, path):
     if not path:
         download.cancel()

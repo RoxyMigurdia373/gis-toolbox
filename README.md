@@ -1,6 +1,6 @@
 # GIS 工具箱 · Windows 本地桌面版
 
-版本 **1.1.0-rc.2（预发布）**。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
+版本 **1.1.0-rc.3（预发布）**。把已经完成的网页工具放进独立的原生 Windows 窗口，支持同时使用，共享一套内置 Python/GIS 运行环境。
 
 ## 当前收录的四个工具
 
@@ -208,3 +208,7 @@ Pop-Location
 [GitHub Releases](https://github.com/RoxyMigurdia373/gis-toolbox/releases) 提供各版本源码、Windows 包和校验清单。详见 [更新日志](CHANGELOG.md) 和 [发布与回退流程](docs/RELEASES.md)。发布脚本读取配置版本号，按版本建目录且拒绝覆盖旧发布包。
 
 UI 设计参考 [frontend-design skill](https://github.com/anthropics/skills/tree/main/skills/frontend-design)，见 [设计说明](docs/DESIGN.md)。运行软件不需要安装此 skill。
+
+## 网页先测试，再封装桌面
+
+网页仓库为功能源码和测试入口，桌面 tools 是通过验收的快照。映射与源提交见 config/web_sources.json；每个工具的 WEB_SOURCE.json 记录逐文件校验值。运行 `python scripts/sync_web_tools.py --check` 检查一致性；确认网页提交成熟并更新映射后，运行 `--apply` 备份并导入，再测试打包。不要直接在桌面副本开发功能后遗漏网页。

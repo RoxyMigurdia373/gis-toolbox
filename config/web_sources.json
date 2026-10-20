@@ -1,0 +1,69 @@
+[
+  {
+    "tool": "farmland_context",
+    "checkout": "farmland_osm",
+    "repository": "https://github.com/RoxyMigurdia373/farmland-osm.git",
+    "commit": "815885495aae6b88ab22adde6c0286ec5da8875a",
+    "files": [
+      ".streamlit/config.toml",
+      "analyzer.py",
+      "app.py",
+      "io_utils.py",
+      "materials.py",
+      "style.css",
+      "tests/test_app.py",
+      "tests/test_materials.py",
+      "tests/test_mixed_export.py",
+      "tests/test_project.py",
+      "tests/test_ranges.py",
+      "tests/test_repair.py",
+      "tests/test_vector_styles.py",
+      "vector_styles.py",
+      "vector_workspace.py"
+    ]
+  },
+  {
+    "tool": "shp_to_kml",
+    "checkout": "shp2kml",
+    "repository": "https://github.com/RoxyMigurdia373/shp2kml.git",
+    "commit": "2e9488be75ace40bd903941b915b6fd8830b4176",
+    "files": [
+      ".streamlit/config.toml",
+      "app.py",
+      "converter.py",
+      "geojson_workspace.py",
+      "make_samples.py",
+      "style.css",
+      "test_batch_ui.py",
+      "test_converter.py",
+      "test_geojson_ui.py",
+      "vector_io.py"
+    ]
+  },
+  {
+    "tool": "split_by_size",
+    "checkout": "vector_size_splitter",
+    "repository": "https://github.com/RoxyMigurdia373/vector-size-splitter.git",
+    "commit": "dbbc255cf5b6c759e46b7ccde3146a7430fb0aec",
+    "files": [
+      ".streamlit/config.toml",
+      "app.py",
+      "io_utils.py",
+      "splitter.py",
+      "style.css",
+      "tests/benchmark_100mb.py",
+      "tests/test_splitter.py"
+    ]
+  },
+  {
+    "tool": "coordinate_converter",
+    "checkout": "coordinate-converter",
+    "repository": "https://github.com/RoxyMigurdia373/coordinate-converter.git",
+    "commit": "eefa9cdbe2840034ef5dbcb55e7cd520102e70d2",
+    "files": [
+      "app.js",
+      "index.html",
+      "style.css"
+    ]
+  }
+]

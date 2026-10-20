@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/RoxyMigurdia373/vector-size-splitter.git",
+  "commit": "dbbc255cf5b6c759e46b7ccde3146a7430fb0aec",
+  "files": {
+    ".streamlit/config.toml": "3e5ee75912d7de6d194a3ee70db17c55aa8155e4e84f983771dddc967d2a5ac4",
+    "app.py": "23696ebba39746e1fa32782b325b53ce78658ddb9183d89f9070e49d90585175",
+    "io_utils.py": "f4c1424477f78ac81ecc95ad0bbee8a11c36a03dc294dedd62ec289ee5674eea",
+    "splitter.py": "15030ea2275a0568e93291a2f82674efe9a52f60bbde6abd1bf2aebf30c82a06",
+    "style.css": "658ba34af3a3cb6feca46f530c93b556786e079b4fd796a65d0ced0ebd1d028b",
+    "tests/benchmark_100mb.py": "e3f658bf3ac1b6ce62476c571e5231b46d955f3a4ed201083193a34a8638bcdc",
+    "tests/test_splitter.py": "7319b55edd3b0b10df3c57141cefb4f1076695299907530253dde5fff7054e8a"
+  }
+}

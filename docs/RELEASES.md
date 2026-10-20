@@ -6,6 +6,8 @@
 
 每次更新的流程：
 
+0. 功能先在网页源仓库开发、测试和验收；桌面窗口/打包修复在本仓库处理。更新 config/web_sources.json 中已验收源提交，运行 `scripts/sync_web_tools.py --apply` 自动备份并导入，然后 `--check` 确认无差异。不得自动将网页测试中功能晋升桌面稳定版。
+
 1. 更新 `config/app_config.toml` 版本号、README、CHANGELOG 和 VALIDATION，写清新增功能、已知限制及验证结果。
 2. 运行相关测试并检查界面。提交全部源码变更。
 3. 运行 `.venv\Scripts\python.exe scripts/build_desktop.py`。构建前自动在项目同级 `gis-toolbox-backups/before-build-时间戳/` 备份当前源码、现有 dist；任一备份或校验失败即中止，不清理旧程序。
